@@ -56,7 +56,6 @@ public class TaskInfo implements Serializable {
     }
 
     public TaskInfo(String contractNo, String contractName, float totalAmount, float payAmount, int payTimes, int status, String remittee, String department, String operator, Date date, Date deadline, String comment) {
-//        this.id = id;
         this.contractNo = contractNo;
         this.contractName = contractName;
         this.totalAmount = totalAmount;
