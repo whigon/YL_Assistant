@@ -1,119 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:foreground="?attr/selectableItemBackground"
 
-    <androidx.cardview.widget.CardView
+    app:cardCornerRadius="4dp"
+    app:cardElevation="4dp"
+    app:cardPreventCornerOverlap="true"
+    app:cardUseCompatPadding="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginStart="0dp"
-        android:layout_marginEnd="0dp"
-        android:foreground="?attr/selectableItemBackground"
+        android:layout_height="match_parent">
 
-        app:cardCornerRadius="4dp"
-        app:cardElevation="4dp"
-        app:cardPreventCornerOverlap="true"
-        app:cardUseCompatPadding="true">
+        <com.xx.roundprogressbar.RoundProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="75dp"
+            android:layout_height="75dp"
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:maxProgress="100"
+            app:progressArgbColor="true"
+            app:progressEndColor="#F1E134"
+            app:progressStartColor="#F14A34"
+            app:secondTextColor="#000000"
+            app:secondTextSize="16sp"
+            app:thirdText=" "
+            app:topText=" " />
 
-            <com.xx.roundprogressbar.RoundProgressBar
-                android:id="@+id/progressBar"
-                android:layout_width="75dp"
-                android:layout_height="75dp"
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="10dp"
+            android:textColor="@color/colorAccent"
+            android:textSize="14sp"
+            android:textStyle="bold"
 
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:maxProgress="100"
-                app:progressArgbColor="true"
-                app:progressEndColor="#F1E134"
-                app:progressStartColor="#F14A34"
-                app:secondTextColor="#000000"
-                app:secondTextSize="16sp"
-                app:thirdText=" "
-                app:topText=" " />
+            app:layout_constraintStart_toEndOf="@id/progressBar"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="合同名称" />
 
-            <TextView
-                android:id="@+id/title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:layout_marginEnd="10dp"
-                android:maxLines="2"
-                android:textColor="@color/colorAccent"
-                android:textSize="14sp"
-                android:textStyle="bold"
+        <TextView
+            android:id="@+id/amount"
+            android:layout_width="85dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:maxHeight="45dp"
+            android:textColor="#000000"
+            android:textSize="12sp"
 
-                app:layout_constraintStart_toEndOf="@id/progressBar"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="合同名称" />
+            app:layout_constraintStart_toEndOf="@id/progressBar"
+            app:layout_constraintTop_toBottomOf="@id/title"
+            tools:text="1000万元" />
 
-            <TextView
-                android:id="@+id/amount"
-                android:layout_width="85dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:maxHeight="45dp"
-                android:textColor="#000000"
-                android:textSize="12sp"
+        <TextView
+            android:id="@+id/text_from"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="FROM:"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:typeface="monospace"
 
-                app:layout_constraintStart_toEndOf="@id/progressBar"
-                app:layout_constraintTop_toBottomOf="@id/title"
-                tools:text="1000万元" />
+            app:layout_constraintStart_toEndOf="@id/progressBar"
+            app:layout_constraintTop_toBottomOf="@id/amount" />
 
-            <TextView
-                android:id="@+id/text_from"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="FROM:"
-                android:textSize="10sp"
-                android:textStyle="bold"
-                android:typeface="monospace"
+        <TextView
+            android:id="@+id/startDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="2dp"
+            android:maxLines="2"
+            android:textSize="10sp"
 
-                app:layout_constraintStart_toEndOf="@id/progressBar"
-                app:layout_constraintTop_toBottomOf="@id/amount" />
+            app:layout_constraintBottom_toBottomOf="@id/text_from"
+            app:layout_constraintStart_toEndOf="@id/text_from"
+            tools:text="2020年8月25日" />
 
-            <TextView
-                android:id="@+id/startDate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="2dp"
-                android:maxLines="2"
-                android:textSize="10sp"
+        <TextView
+            android:id="@+id/text_till"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="TILL:"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:typeface="monospace"
 
-                app:layout_constraintBottom_toBottomOf="@id/text_from"
-                app:layout_constraintStart_toEndOf="@id/text_from"
-                tools:text="2020年8月25日" />
+            app:layout_constraintStart_toEndOf="@id/progressBar"
+            app:layout_constraintTop_toBottomOf="@id/text_from" />
 
-            <TextView
-                android:id="@+id/text_till"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="TILL:"
-                android:textSize="10sp"
-                android:textStyle="bold"
-                android:typeface="monospace"
+        <TextView
+            android:id="@+id/endDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="2dp"
+            android:maxLines="2"
+            android:textSize="10sp"
 
-                app:layout_constraintStart_toEndOf="@id/progressBar"
-                app:layout_constraintTop_toBottomOf="@id/text_from" />
-
-            <TextView
-                android:id="@+id/endDate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="2dp"
-                android:maxLines="2"
-                android:textSize="10sp"
-
-                app:layout_constraintBottom_toBottomOf="@id/text_till"
-                app:layout_constraintStart_toEndOf="@id/text_till"
-                tools:text="2020年8月25日" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.cardview.widget.CardView>
-</androidx.constraintlayout.widget.ConstraintLayout>
+            app:layout_constraintBottom_toBottomOf="@id/text_till"
+            app:layout_constraintStart_toEndOf="@id/text_till"
+            tools:text="2020年8月25日" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

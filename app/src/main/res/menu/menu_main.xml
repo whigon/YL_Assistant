@@ -3,14 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.yl.MainActivity">
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/sort_1"
         android:orderInCategory="100"
-        android:title="@string/action_settings"
+        android:title="按金额排序"
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/action1"
+        android:id="@+id/sort_2"
         android:orderInCategory="100"
-        android:title="action1"
+        android:title="按截止日期排序"
         app:showAsAction="never" />
 </menu>

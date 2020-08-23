@@ -56,7 +56,7 @@ public class MyAdapter extends BaseAdapter {
         viewHolder.progressBar.setCurrentProgress(progress > 100 ? 100 : progress);
         // 设置合同名称
         String title = taskInfoList.get(position).getContractName();
-        viewHolder.title.setText(truncateString(title, 12));
+        viewHolder.title.setText(truncateString(title, 6));
         // 设置总金额
         viewHolder.amount.setText(totalAmount / 10000 + "万元");
         // 设置日期

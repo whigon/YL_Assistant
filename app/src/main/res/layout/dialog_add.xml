@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:scrollbars="none">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="15dp">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="添加新合同"
+            android:textAlignment="center"
+            android:textColor="@color/colorAccent"
+            android:textSize="20sp" />
+
+        <EditText
+            android:id="@+id/edt_contract_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="合同名称*"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/edt_contract_no"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="合同编号*" />
+
+        <EditText
+            android:id="@+id/edt_remittee"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="收款方*" />
+
+        <EditText
+            android:id="@+id/edt_total_amount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="总金额（元）*" />
+
+        <EditText
+            android:id="@+id/edt_pay_amount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="已付金额（元）" />
+
+
+        <EditText
+            android:id="@+id/edt_department"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="负责部门" />
+
+        <EditText
+            android:id="@+id/edt_operator"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="业务员" />
+
+        <EditText
+            android:id="@+id/edt_comment"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:gravity="top"
+            android:hint="备注" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_pickTime"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="3dp"
+                android:layout_weight="1"
+                android:text="选择日期"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/btn_confirm"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="3dp"
+                android:layout_weight="1"
+                android:text="确定"
+                android:textSize="16sp" />
+        </LinearLayout>
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

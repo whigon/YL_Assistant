@@ -27,6 +27,7 @@ public class TaskInfo implements Serializable {
     @DatabaseField(columnName = "pay_times", canBeNull = false, defaultValue = "0")
     private int payTimes;
 
+    // 0-新建 1-部分完成 2-全部完成
     @DatabaseField(columnName = "status", canBeNull = false, defaultValue = "0")
     private int status;
 
@@ -55,12 +56,28 @@ public class TaskInfo implements Serializable {
 
     }
 
-    public TaskInfo(String contractNo, String contractName, float totalAmount, float payAmount, int payTimes, int status, String remittee, String department, String operator, Date date, Date deadline, String comment) {
+    public TaskInfo(int id, String contractNo, String contractName, float totalAmount, float payAmount, int payTimes, int status, String remittee, String department, String operator, Date date, Date deadline, String comment) {
+        this.id = id;
         this.contractNo = contractNo;
         this.contractName = contractName;
         this.totalAmount = totalAmount;
         this.payAmount = payAmount;
         this.payTimes = payTimes;
+        this.status = status;
+        this.remittee = remittee;
+        this.department = department;
+        this.operator = operator;
+        this.date = date;
+        this.deadline = deadline;
+        this.comment = comment;
+    }
+
+    public TaskInfo(String contractNo, String contractName, float totalAmount, float payAmount, int payTimes, int status, String remittee, String department, String operator, Date date, Date deadline, String comment) {
+        this.contractNo = contractNo;
+        this.contractName = contractName;
+        this.totalAmount = totalAmount;
+        this.payAmount = payAmount;
+        this.payTimes = payTimes; //TODO:添加的时候默认设置为0，待处理
         this.status = status;
         this.remittee = remittee;
         this.department = department;
