@@ -27,11 +27,13 @@ import com.example.yl.Dao.BaseDao;
 import com.example.yl.Dao.TaskInfoImpl;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -40,7 +42,6 @@ public class MainActivity extends AppCompatActivity {
     private List<TaskInfo> taskInfoList = new ArrayList<>();
     private MyAdapter myAdapter;
     private GridView gridView;
-    private Toolbar toolbar;
 
     private BaseDao taskInfoDao = new TaskInfoImpl(MainActivity.this);
 //    private BaseDao paymentRecordDao = new PaymentRecordImpl(MainActivity.this);
@@ -71,12 +72,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+        Iterator<TaskInfo> iterator;
 
         switch (id) {
             case R.id.sort_1:
                 // 数据变化了才能影响notifyDataSetChanged，改变内存
                 taskInfoList.clear();
                 taskInfoList.addAll(taskInfoDao.getAll());
+
                 taskInfoList.sort((o1, o2) -> {
                     if (o1.getTotalAmount() < o2.getTotalAmount())
                         return 1;
@@ -84,11 +87,13 @@ public class MainActivity extends AppCompatActivity {
                         return -1;
                     return 0;
                 });
+
                 myAdapter.notifyDataSetChanged();
                 return true;
             case R.id.sort_2:
                 taskInfoList.clear();
                 taskInfoList.addAll(taskInfoDao.getAll());
+
                 taskInfoList.sort((o1, o2) -> {
                     if (o1.getDeadline().before(o2.getDeadline()))
                         return 1;
@@ -96,6 +101,33 @@ public class MainActivity extends AppCompatActivity {
                         return -1;
                     return 0;
                 });
+
+                myAdapter.notifyDataSetChanged();
+                return true;
+            case R.id.unfinished:
+                taskInfoList.clear();
+                taskInfoList.addAll(taskInfoDao.getAll());
+
+                iterator = taskInfoList.iterator();
+                while (iterator.hasNext()) {
+                    TaskInfo bean = iterator.next();
+                    if (bean.getStatus() == 2)
+                        iterator.remove();
+                }
+
+                myAdapter.notifyDataSetChanged();
+                return true;
+            case R.id.finished:
+                taskInfoList.clear();
+                taskInfoList.addAll(taskInfoDao.getAll());
+
+                iterator = taskInfoList.iterator();
+                while (iterator.hasNext()) {
+                    TaskInfo bean = iterator.next();
+                    if (bean.getStatus() != 2)
+                        iterator.remove();
+                }
+
                 myAdapter.notifyDataSetChanged();
                 return true;
         }
@@ -104,22 +136,89 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initView() {
-        toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         gridView = findViewById(R.id.grid_view);
         gridView.setOnItemLongClickListener((parent, view, position, id) -> {
-            // TODO: add function: modify and delete item
+            TaskInfo bean = taskInfoList.get(position);
+
+            view = LayoutInflater.from(MainActivity.this).inflate(R.layout.pop_menu, null, false);
+            Dialog dialog = makeDialog(view);
+
+            Button editButton = view.findViewById(R.id.btn_edit);
+            Button deleteButton = view.findViewById(R.id.btn_delete);
+
+            editButton.setOnClickListener(v -> {
+                dialog.dismiss();
+                Bundle bundle = new Bundle();
+
+                Date fromdate = bean.getDate();
+                Date deadline = bean.getDeadline();
+                String fromdateStr = format.format(fromdate);
+                String deadlineStr = format.format(deadline);
+                String year = deadlineStr.substring(0, 4);
+                String month = deadlineStr.substring(5, 7);
+                String day = deadlineStr.substring(8, 10);
+
+                // 放置数据
+                bundle.putInt("id", bean.getId());
+                bundle.putString("contract_name", bean.getContractName());
+                bundle.putString("contract_no", bean.getContractNo());
+                bundle.putString("remittee", bean.getRemittee());
+                bundle.putFloat("total_amount", bean.getTotalAmount());
+                bundle.putFloat("pay_amount", bean.getPayAmount());
+                bundle.putString("department", bean.getDepartment());
+                bundle.putString("operator", bean.getOperator());
+                bundle.putString("comment", bean.getComment());
+
+                bundle.putString("year", year);
+                bundle.putString("month", month);
+                bundle.putString("day", day);
+                bundle.putString("fromDateStr", fromdateStr);
+
+                v = LayoutInflater.from(MainActivity.this).inflate(R.layout.dialog_add, null, false);
+                Dialog editDialog = makeDialog(v);
+                // 点击视图外不会触发返回
+                editDialog.setCanceledOnTouchOutside(false);
+//                // TODO: 返回的时候处理逻辑 -- 如果有修改的话提示是否保存，没有的话就直接返回
+//                editDialog.setOnCancelListener(dialog1 -> {
+//                    Log.d(TAG, "onCancel: ");
+//                    Button btn = v.findViewById(R.id.btn_confirm);
+//                    // 默认的日期是当日
+//                    pickedDate = new Date();
+//                    btn.callOnClick();
+//                });
+                createOrUpdate(editDialog, true, bundle);
+            });
+            deleteButton.setOnClickListener(v -> {
+                dialog.dismiss();
+                v = LayoutInflater.from(MainActivity.this).inflate(R.layout.delete, null, false);
+                Dialog deleteDialog = makeDialog(v);
+
+                Button btnComfirm = v.findViewById(R.id.btn_confirm);
+                Button btnCancel = v.findViewById(R.id.btn_cancel);
+
+                btnComfirm.setOnClickListener(v1 -> {
+                    taskInfoDao.delete(bean);
+                    taskInfoList.remove(bean);
+                    myAdapter.notifyDataSetChanged();
+                    deleteDialog.dismiss();
+                });
+                btnCancel.setOnClickListener(v1 -> {
+                    deleteDialog.dismiss();
+                });
+            });
 
             return false;
         });
-        // TODO: add function: add new task
+
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> {
             view = LayoutInflater.from(MainActivity.this).inflate(R.layout.dialog_add, null, false);
             Dialog dialog = makeDialog(view);
             // 点击视图外不会触发返回
             dialog.setCanceledOnTouchOutside(false);
-            // TODO: 魔幻现实主义代码
+            // TODO: 魔幻现实主义代码, 深究一下应该是根据组件ID去定位不是根据内存地址
             final View finalView = view;
             dialog.setOnCancelListener(dialog1 -> {
                 Log.d(TAG, "onCancel: ");
@@ -169,8 +268,10 @@ public class MainActivity extends AppCompatActivity {
             edtContractName.setText(bundle.getString("contract_name"));
             edtContractNo.setText(bundle.getString("contract_no"));
             edtRemittee.setText(bundle.getString("remittee"));
-            edtTotalAmount.setText("" + bundle.getFloat("total_amount"));
-            edtPayAmount.setText("" + bundle.getFloat("pay_amount"));
+            DecimalFormat floatFormat = new DecimalFormat();// 设置显示的格式
+            floatFormat.setMaximumFractionDigits(2);
+            edtTotalAmount.setText("" + floatFormat.format(bundle.getFloat("total_amount")));
+            edtPayAmount.setText("" + floatFormat.format(bundle.getFloat("pay_amount")));
             edtDepartment.setText(bundle.getString("department", ""));
             edtOperator.setText(bundle.getString("operator", ""));
             edtComment.setText(bundle.getString("comment", ""));
@@ -202,7 +303,7 @@ public class MainActivity extends AppCompatActivity {
             // 获取日期
             final DatePickerDialog datePickerDialog = new DatePickerDialog(MainActivity.this,
                     (view1, year, month, dayOfMonth) -> {
-                        try {
+                        try { //TODO:时间不能早于当前
                             pickedDate = format.parse(year + "/" + (month + 1) + "/" + dayOfMonth);
                             Log.d(TAG, "onDateSet: " + pickedDate);
                         } catch (ParseException e) {
@@ -220,8 +321,9 @@ public class MainActivity extends AppCompatActivity {
                 String contractName = edtContractName.getText().toString();
                 String contractNo = edtContractNo.getText().toString();
                 String remittee = edtRemittee.getText().toString();
-                Float totalAmount = Float.parseFloat(edtTotalAmount.getText().toString());
-                Float payAmount = Float.parseFloat(edtPayAmount.getText().toString().equals("") ? "0" : edtPayAmount.getText().toString());// 已付金额不是必选
+                Float totalAmount = Float.parseFloat(edtTotalAmount.getText().toString().replace(",", ""));// 显示出来的数字会有逗号
+                Log.d(TAG, "createOrUpdate: totalAmount  " + totalAmount);
+                Float payAmount = Float.parseFloat(edtPayAmount.getText().toString().equals("") ? "0" : edtPayAmount.getText().toString().replace(",", ""));// 已付金额不是必选
                 String department = edtDepartment.getText().toString();
                 String operator = edtOperator.getText().toString();
                 String comment = edtComment.getText().toString();
@@ -241,15 +343,15 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "请设置截止时间", Toast.LENGTH_LONG).show();
                 else {
                     // 0-新建 1-部分完成 2-全部完成
-                    int status = (payAmount == 0) ? 0 : (payAmount == totalAmount ? 2 : 1);
-
+                    int status = (payAmount == 0) ? 0 : (payAmount.equals(totalAmount) ? 2 : 1);
                     TaskInfo taskInfoBean;
                     String reminderStr;
+
                     if (isUpdate) {
                         int id = bundle.getInt("id");
-                        String dateStr = bundle.getString("dateStr");
-                        Date date = format.parse(dateStr);
-                        taskInfoBean = new TaskInfo(id, contractNo, contractName, totalAmount, payAmount, 0, status, remittee, department, operator, date, pickedDate, comment);
+                        String dateStr = bundle.getString("fromDateStr");
+                        Date fromDate = format.parse(dateStr);
+                        taskInfoBean = new TaskInfo(id, contractNo, contractName, totalAmount, payAmount, 0, status, remittee, department, operator, fromDate, pickedDate, comment);
                         taskInfoDao.update(taskInfoBean);
                         reminderStr = "更新成功";
                     } else {

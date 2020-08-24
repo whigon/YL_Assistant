@@ -2,6 +2,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.yl.MainActivity">
+
+    <item
+        android:id="@+id/unfinished"
+        android:orderInCategory="100"
+        android:title="未完成"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/finished"
+        android:orderInCategory="100"
+        android:title="已完成"
+        app:showAsAction="never" />
     <item
         android:id="@+id/sort_1"
         android:orderInCategory="100"
