@@ -1,8 +1,10 @@
 package com.example.yl;
 
+import android.Manifest;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.InputType;
@@ -20,6 +22,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.example.yl.Adapter.MyAdapter;
 import com.example.yl.Beans.TaskInfo;
@@ -60,6 +64,9 @@ public class MainActivity extends AppCompatActivity {
         initView();
         myAdapter = new MyAdapter(MainActivity.this, taskInfoList);
         gridView.setAdapter(myAdapter);
+
+        if (!checkPermission())
+            Toast.makeText(MainActivity.this, "请允许使用日历权限", Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -135,10 +142,23 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private boolean checkPermission() {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_CALENDAR,
+                            Manifest.permission.READ_CALENDAR}, 1);
+            return false;
+        }
+        return true;
+    }
+
     private void initView() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         gridView = findViewById(R.id.grid_view);
+
+        // 长按编辑或删除
         gridView.setOnItemLongClickListener((parent, view, position, id) -> {
             TaskInfo bean = taskInfoList.get(position);
 
@@ -150,37 +170,13 @@ public class MainActivity extends AppCompatActivity {
 
             editButton.setOnClickListener(v -> {
                 dialog.dismiss();
-                Bundle bundle = new Bundle();
+                Bundle bundle = getBundle(bean);
 
-                Date fromdate = bean.getDate();
-                Date deadline = bean.getDeadline();
-                String fromdateStr = format.format(fromdate);
-                String deadlineStr = format.format(deadline);
-                String year = deadlineStr.substring(0, 4);
-                String month = deadlineStr.substring(5, 7);
-                String day = deadlineStr.substring(8, 10);
-
-                // 放置数据
-                bundle.putInt("id", bean.getId());
-                bundle.putString("contract_name", bean.getContractName());
-                bundle.putString("contract_no", bean.getContractNo());
-                bundle.putString("remittee", bean.getRemittee());
-                bundle.putFloat("total_amount", bean.getTotalAmount());
-                bundle.putFloat("pay_amount", bean.getPayAmount());
-                bundle.putString("department", bean.getDepartment());
-                bundle.putString("operator", bean.getOperator());
-                bundle.putString("comment", bean.getComment());
-
-                bundle.putString("year", year);
-                bundle.putString("month", month);
-                bundle.putString("day", day);
-                bundle.putString("fromDateStr", fromdateStr);
-
-                v = LayoutInflater.from(MainActivity.this).inflate(R.layout.dialog_add, null, false);
+                v = LayoutInflater.from(MainActivity.this).inflate(R.layout.dialog_edit, null, false);
                 Dialog editDialog = makeDialog(v);
                 // 点击视图外不会触发返回
                 editDialog.setCanceledOnTouchOutside(false);
-//                // TODO: 返回的时候处理逻辑 -- 如果有修改的话提示是否保存，没有的话就直接返回
+                // TODO: 返回的时候处理逻辑 -- 如果有修改的话提示是否保存，没有的话就直接返回
 //                editDialog.setOnCancelListener(dialog1 -> {
 //                    Log.d(TAG, "onCancel: ");
 //                    Button btn = v.findViewById(R.id.btn_confirm);
@@ -209,12 +205,50 @@ public class MainActivity extends AppCompatActivity {
                 });
             });
 
-            return false;
+            // 设为true后，setOnItemClickListener就不会响应
+            return true;
+        });
+
+        // 点击显示合同信息
+        gridView.setOnItemClickListener((parent, view, position, id) -> {
+            TaskInfo bean = taskInfoList.get(position);
+
+            view = LayoutInflater.from(MainActivity.this).inflate(R.layout.dialog_view, null, false);
+            makeDialog(view);
+
+            TextView contractNameView = view.findViewById(R.id.text_contract_name);
+            TextView contractNoView = view.findViewById(R.id.text_contract_no);
+            TextView remitteeView = view.findViewById(R.id.text_remittee);
+            TextView startDateView = view.findViewById(R.id.text_date);
+            TextView deadlineView = view.findViewById(R.id.text_deadline);
+            TextView totalAmountView = view.findViewById(R.id.text__total_amount);
+            totalAmountView.setFilters(new InputFilter[]{new InputFilter.LengthFilter(12)});
+            TextView payAmountView = view.findViewById(R.id.text_pay_amount);
+            payAmountView.setFilters(new InputFilter[]{new InputFilter.LengthFilter(12)});
+            TextView payTimesView = view.findViewById(R.id.text_pay_times);
+            payTimesView.setFilters(new InputFilter[]{new InputFilter.LengthFilter(12)});
+            TextView departmentView = view.findViewById(R.id.text_department);
+            TextView operatorView = view.findViewById(R.id.text_operator);
+            TextView commentView = view.findViewById(R.id.text_comment);
+
+            contractNameView.setText(bean.getContractName());
+            contractNoView.setText(bean.getContractNo());
+            remitteeView.setText(bean.getRemittee());
+            startDateView.setText(format.format(bean.getDate()));
+            deadlineView.setText(format.format(bean.getDeadline()));
+            DecimalFormat floatFormat = new DecimalFormat();// 设置显示的格式
+            floatFormat.setMaximumFractionDigits(2);
+            totalAmountView.setText("" + floatFormat.format(bean.getTotalAmount()));
+            payAmountView.setText("" + floatFormat.format(bean.getPayAmount()));
+            payTimesView.setText("" + bean.getPayTimes());
+            departmentView.setText(bean.getDepartment());
+            operatorView.setText(bean.getOperator());
+            commentView.setText(bean.getComment());
         });
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> {
-            view = LayoutInflater.from(MainActivity.this).inflate(R.layout.dialog_add, null, false);
+            view = LayoutInflater.from(MainActivity.this).inflate(R.layout.dialog_edit, null, false);
             Dialog dialog = makeDialog(view);
             // 点击视图外不会触发返回
             dialog.setCanceledOnTouchOutside(false);
@@ -239,10 +273,41 @@ public class MainActivity extends AppCompatActivity {
         return dialog;
     }
 
+    private Bundle getBundle(TaskInfo bean) {
+        Bundle bundle = new Bundle();
+
+        Date fromdate = bean.getDate();
+        Date deadline = bean.getDeadline();
+        String fromdateStr = format.format(fromdate);
+        String deadlineStr = format.format(deadline);
+        String year = deadlineStr.substring(0, 4);
+        String month = deadlineStr.substring(5, 7);
+        String day = deadlineStr.substring(8, 10);
+
+        // 放置数据
+        bundle.putInt("id", bean.getId());
+        bundle.putString("contract_name", bean.getContractName());
+        bundle.putString("contract_no", bean.getContractNo());
+        bundle.putString("remittee", bean.getRemittee());
+        bundle.putFloat("total_amount", bean.getTotalAmount());
+        bundle.putFloat("pay_amount", bean.getPayAmount());
+        bundle.putInt("pay_times", bean.getPayTimes());
+        bundle.putString("department", bean.getDepartment());
+        bundle.putString("operator", bean.getOperator());
+        bundle.putString("comment", bean.getComment());
+
+        bundle.putString("year", year);
+        bundle.putString("month", month);
+        bundle.putString("day", day);
+        bundle.putString("fromDateStr", fromdateStr);
+
+        return bundle;
+    }
+
     private void createOrUpdate(final Dialog dialog, final boolean isUpdate, final Bundle bundle) {
         final View view = Objects.requireNonNull(dialog.getWindow()).getDecorView();
-        TextView titleText = view.findViewById(R.id.title);
 
+        TextView titleText = view.findViewById(R.id.title);
         final EditText edtContractName = view.findViewById(R.id.edt_contract_name);
         final EditText edtContractNo = view.findViewById(R.id.edt_contract_no);
         final EditText edtRemittee = view.findViewById(R.id.edt_remittee);
@@ -266,11 +331,15 @@ public class MainActivity extends AppCompatActivity {
             titleText.setText("编辑合同");
 
             edtContractName.setText(bundle.getString("contract_name"));
+            edtContractName.setEnabled(false);
             edtContractNo.setText(bundle.getString("contract_no"));
+            edtContractNo.setEnabled(false);
             edtRemittee.setText(bundle.getString("remittee"));
+            edtRemittee.setEnabled(false);
             DecimalFormat floatFormat = new DecimalFormat();// 设置显示的格式
             floatFormat.setMaximumFractionDigits(2);
             edtTotalAmount.setText("" + floatFormat.format(bundle.getFloat("total_amount")));
+            edtTotalAmount.setEnabled(false);
             edtPayAmount.setText("" + floatFormat.format(bundle.getFloat("pay_amount")));
             edtDepartment.setText(bundle.getString("department", ""));
             edtOperator.setText(bundle.getString("operator", ""));
@@ -352,11 +421,19 @@ public class MainActivity extends AppCompatActivity {
                         String dateStr = bundle.getString("fromDateStr");
                         Date fromDate = format.parse(dateStr);
                         taskInfoBean = new TaskInfo(id, contractNo, contractName, totalAmount, payAmount, 0, status, remittee, department, operator, fromDate, pickedDate, comment);
+                        // 更新数据库
                         taskInfoDao.update(taskInfoBean);
+                        // 编辑日历事件
+                        editCalendarEvent(taskInfoBean);
+
                         reminderStr = "更新成功";
                     } else {
                         taskInfoBean = new TaskInfo(contractNo, contractName, totalAmount, payAmount, 0, status, remittee, department, operator, new Date(), pickedDate, comment);
-                        taskInfoDao.insert(taskInfoBean);  // TODO:相同的插入怎么解决
+                        // 插入数据库
+                        taskInfoDao.insert(taskInfoBean);  // TODO:相同的合同编号插入
+                        // 编辑日历事件
+                        editCalendarEvent(taskInfoBean);
+
                         reminderStr = "新建成功";
                     }
                     pickedDate = null;
@@ -377,4 +454,20 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    private void editCalendarEvent(TaskInfo taskInfoBean) {
+        String title = "合同" + taskInfoBean.getContractNo() + "截止日";
+        String description = taskInfoBean.toString();
+        long deadline = taskInfoBean.getDeadline().getTime();
+        int status = taskInfoBean.getStatus();
+
+        if (status == 0 || status == 1) {
+            // 添加/修改
+            CalendarReminder.addCalendarEvent(MainActivity.this, title, description, deadline, 7);
+        } else if (status == 2) {
+            // 删除
+            CalendarReminder.deleteCalendarEvent(MainActivity.this, title);
+        }
+    }
+
 }

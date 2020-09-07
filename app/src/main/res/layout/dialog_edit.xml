@@ -15,6 +15,7 @@
             android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:padding="15dp"
             android:text="添加新合同"
             android:textAlignment="center"
             android:textColor="@color/colorAccent"

@@ -18,10 +18,6 @@ public class CalendarReminder {
     private static String CALENDER_EVENT_URL = "content://com.android.calendar/events";
     private static String CALENDER_REMINDER_URL = "content://com.android.calendar/reminders";
 
-    private static String CALENDARS_NAME = "YL";
-    private static String CALENDARS_ACCOUNT_NAME = "AlwaysBeHappy";
-    private static String CALENDARS_DISPLAY_NAME = "一路向阳";
-
     /**
      * 检查是否已经添加了日历账户，如果没有添加先添加一个日历账户再查询
      * 获取账户成功返回账户id，否则返回-1
@@ -32,11 +28,10 @@ public class CalendarReminder {
             return oldId;
         } else {
             long addId = createCalendarAccount(context);
-            if (addId >= 0) {
+            if (addId >= 0)
                 return checkCalendarAccount(context);
-            } else {
+            else
                 return -1;
-            }
         }
     }
 
@@ -46,11 +41,12 @@ public class CalendarReminder {
     private static int checkCalendarAccount(Context context) {
         try (Cursor cursor = context.getContentResolver().query(Uri.parse(CALENDER_URL),
                 null, null, null, null);) {
-            if (cursor == null) { //查询返回空值
+            if (cursor == null)
                 return -1;
-            }
+
             int count = cursor.getCount();
-            if (count > 0) { //存在现有账户，取第一个账户的id返回
+            if (count > 0) {
+                // 存在现有账户，取第一个账户的id返回
                 cursor.moveToFirst();
                 return cursor.getInt(cursor.getColumnIndex(CalendarContract.Calendars._ID));
             } else {
@@ -61,8 +57,13 @@ public class CalendarReminder {
 
     /**
      * 添加日历账户，账户创建成功则返回账户id，否则返回-1
+     * 没有权限返回-2
      */
     private static long createCalendarAccount(Context context) {
+        String CALENDARS_NAME = "一路向阳";
+        String CALENDARS_ACCOUNT_NAME = "AlwaysBeHappy@YL";
+        String CALENDARS_DISPLAY_NAME = "AlwaysBeHappy";
+
         // 账户数据
         ContentValues value = new ContentValues();
         value.put(CalendarContract.Calendars.ACCOUNT_TYPE, CalendarContract.ACCOUNT_TYPE_LOCAL);
@@ -114,20 +115,19 @@ public class CalendarReminder {
      * 添加日历事件
      */
     public static boolean addCalendarEvent(Context context, String title, String description, long deadline, int advancedDays) {
-        if (context == null) {
+        if (context == null)
             return false;
-        }
 
         // 获取账户id失败直接返回
         int calId = getCalendarAccount(context);
-        if (calId < 0) {
+        if (calId < 0)
             return false;
-        }
 
         Calendar mCalendar = Calendar.getInstance();
         // 设置开始时间
         mCalendar.setTimeInMillis(deadline);
-        long start = mCalendar.getTime().getTime();
+        // 设置事件发生时间为中午十二点
+        long start = mCalendar.getTime().getTime() + 12 * 60 * 60 * 1000;
         // 设置终止时间，开始时间加一个小时
         mCalendar.setTimeInMillis(start + 60 * 60 * 1000);
         long end = mCalendar.getTime().getTime();
@@ -153,17 +153,25 @@ public class CalendarReminder {
             return false;
 
         // 事件提醒的设定
-        ContentValues values = new ContentValues();
+        ContentValues reminder1 = new ContentValues();
         // 插入events表 得到eventId也就是对应在events表中自动生成的id字段
-        values.put(CalendarContract.Reminders.EVENT_ID, ContentUris.parseId(newEvent));
+        reminder1.put(CalendarContract.Reminders.EVENT_ID, ContentUris.parseId(newEvent));
         // 提前N天提醒
-        values.put(CalendarContract.Reminders.MINUTES, advancedDays * 24 * 60);
+        reminder1.put(CalendarContract.Reminders.MINUTES, advancedDays * 24 * 60);
         // 设置提醒方式
-        values.put(CalendarContract.Reminders.METHOD, CalendarContract.Reminders.METHOD_ALERT);
-        Uri uri = context.getContentResolver().insert(Uri.parse(CALENDER_REMINDER_URL), values);
-        // 添加事件提醒失败直接返回
-        if (uri == null)
-            return false;
+        reminder1.put(CalendarContract.Reminders.METHOD, CalendarContract.Reminders.METHOD_ALERT);
+        // 插入提醒
+        context.getContentResolver().insert(Uri.parse(CALENDER_REMINDER_URL), reminder1);
+//        // 添加事件提醒失败直接返回
+//        if (context.getContentResolver().insert(Uri.parse(CALENDER_REMINDER_URL), reminder) == null)
+//            return false;
+
+        // 提醒2
+        ContentValues reminder2 = new ContentValues();
+        reminder2.put(CalendarContract.Reminders.EVENT_ID, ContentUris.parseId(newEvent));
+        reminder2.put(CalendarContract.Reminders.MINUTES, advancedDays * 24 * 60 - 120);
+        reminder2.put(CalendarContract.Reminders.METHOD, CalendarContract.Reminders.METHOD_ALERT);
+        context.getContentResolver().insert(Uri.parse(CALENDER_REMINDER_URL), reminder2);
 
         return true;
     }
@@ -172,15 +180,14 @@ public class CalendarReminder {
      * 删除日历事件
      */
     public static boolean deleteCalendarEvent(Context context, String title) {
-        if (context == null) {
+        if (context == null)
             return false;
-        }
 
         try (Cursor cursor = context.getContentResolver().query(Uri.parse(CALENDER_EVENT_URL),
                 null, null, null, null)) {
-            if (cursor == null) {
+            if (cursor == null)
                 return false;
-            }
+
             if (cursor.getCount() > 0) {
                 // 遍历所有事件，找到title跟需要查询的title一样的项
                 for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {

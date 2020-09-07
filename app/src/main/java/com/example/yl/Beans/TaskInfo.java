@@ -193,20 +193,12 @@ public class TaskInfo implements Serializable {
 
     @Override
     public String toString() {
-        return "TaskInfo{" +
-                "id=" + id +
-                ", contractNo='" + contractNo + '\'' +
-                ", contractName='" + contractName + '\'' +
-                ", totalAmount=" + totalAmount +
-                ", payAmount=" + payAmount +
-                ", payTimes=" + payTimes +
-                ", status=" + status +
-                ", remittee='" + remittee + '\'' +
-                ", department='" + department + '\'' +
-                ", operator='" + operator + '\'' +
-                ", date=" + date +
-                ", deadline=" + deadline +
-                ", comment='" + comment +
-                '}';
+        return  "合同编号：" + contractNo + '\n' +
+                "合同名称：" + contractName + '\n' +
+                "总金额：" + totalAmount + '\n' +
+                "已付金额：" + payAmount + '\n' +
+                "起始日期：" + date + '\n' +
+                "截止日期：" + deadline + '\n' +
+                "备注：" + comment;
     }
 }
